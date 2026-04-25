@@ -1,10 +1,15 @@
 """PawPal+ Streamlit UI — wired to pawpal_system.py backend logic."""
 
+import os
 from datetime import date
 
+from dotenv import load_dotenv
 import streamlit as st
 
+load_dotenv()
+
 from pawpal_system import Owner, Pet, Task, Scheduler
+from rag import ask as rag_ask
 
 # ------------------------------------------------------------------ #
 # Page config
@@ -75,8 +80,8 @@ if not owner.pets:
 scheduler = Scheduler(owner)
 
 # Tabs for clean navigation
-tab_schedule, tab_add, tab_manage = st.tabs(
-    ["📅 Today's Schedule", "➕ Add Task", "🔧 Manage Tasks"]
+tab_schedule, tab_add, tab_manage, tab_ai = st.tabs(
+    ["📅 Today's Schedule", "➕ Add Task", "🔧 Manage Tasks", "🤖 Pet Care Assistant"]
 )
 
 # ------------------------------------------------------------------ #
@@ -263,6 +268,75 @@ with tab_manage:
                         if pet_obj:
                             pet_obj.remove_task(task.id)
                         st.rerun()
+
+# ------------------------------------------------------------------ #
+# Tab 4 — Pet Care Assistant (RAG)
+# ------------------------------------------------------------------ #
+with tab_ai:
+    st.subheader("🤖 Pet Care Assistant")
+    st.caption(
+        "Ask anything about feeding, medications, exercise, grooming, or vet visits. "
+        "Answers are grounded in PawPal+'s built-in pet care knowledge base."
+    )
+
+    api_key_set = bool(os.environ.get("GOOGLE_API_KEY", "").strip())
+    if not api_key_set:
+        st.error(
+            "**GOOGLE_API_KEY not set.** "
+            "Export it in your terminal before launching the app:\n\n"
+            "```\nexport GOOGLE_API_KEY=AIza...\nstreamlit run app.py\n```"
+        )
+    else:
+        # Build pet context string so Claude knows which animals this owner has
+        pet_context = ", ".join(
+            f"{p.name} ({p.species})" for p in owner.pets
+        ) if owner.pets else ""
+
+        # Session-state chat history: list of {"role": "user"|"assistant", ...}
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+
+        # Render existing conversation
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+                if msg["role"] == "assistant" and msg.get("sources"):
+                    with st.expander("📚 Sources retrieved from knowledge base"):
+                        for src in msg["sources"]:
+                            st.markdown(f"**{src['source'].capitalize()}**")
+                            st.markdown(src["content"][:400] + ("…" if len(src["content"]) > 400 else ""))
+                            st.divider()
+
+        # Input box
+        user_input = st.chat_input("e.g. How often should I walk my dog?")
+        if user_input:
+            st.session_state.chat_history.append({"role": "user", "content": user_input})
+            with st.chat_message("user"):
+                st.markdown(user_input)
+
+            with st.chat_message("assistant"):
+                with st.spinner("Looking up pet care info…"):
+                    try:
+                        answer, sources = rag_ask(user_input, pet_context=pet_context)
+                        st.markdown(answer)
+                        if sources:
+                            with st.expander("📚 Sources retrieved from knowledge base"):
+                                for src in sources:
+                                    st.markdown(f"**{src['source'].capitalize()}**")
+                                    st.markdown(src["content"][:400] + ("…" if len(src["content"]) > 400 else ""))
+                                    st.divider()
+                        st.session_state.chat_history.append(
+                            {"role": "assistant", "content": answer, "sources": sources}
+                        )
+                    except EnvironmentError as e:
+                        st.error(str(e))
+                    except Exception as e:
+                        st.error(f"Something went wrong: {e}")
+
+        if st.session_state.chat_history:
+            if st.button("🗑 Clear conversation"):
+                st.session_state.chat_history = []
+                st.rerun()
 
 # ------------------------------------------------------------------ #
 # Footer
