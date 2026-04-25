@@ -8,8 +8,8 @@ import streamlit as st
 
 load_dotenv()
 
-from pawpal_system import Owner, Pet, Task, Scheduler
-from rag import ask as rag_ask
+from src.pawpal_system import Owner, Pet, Task, Scheduler
+from src.rag import ask as rag_ask
 
 # ------------------------------------------------------------------ #
 # Page config

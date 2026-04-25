@@ -3,7 +3,7 @@
 import pytest
 from datetime import date, timedelta
 
-from pawpal_system import Task, Pet, Owner, Scheduler
+from src.pawpal_system import Task, Pet, Owner, Scheduler
 
 
 # ------------------------------------------------------------------ #

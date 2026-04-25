@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-KB_DIR = Path(__file__).parent / "knowledge_base"
+KB_DIR = Path(__file__).parent.parent / "knowledge_base"
 
 STOPWORDS = {
     "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",

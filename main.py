@@ -1,7 +1,7 @@
 """CLI demo script: verifies PawPal+ backend logic in the terminal."""
 
 from datetime import date, timedelta
-from pawpal_system import Owner, Pet, Task, Scheduler
+from src.pawpal_system import Owner, Pet, Task, Scheduler
 
 
 def print_section(title: str) -> None:

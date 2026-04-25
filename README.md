@@ -85,25 +85,29 @@ python -m pytest tests/ -v
 ## Project Structure
 
 ```
-app.py                  # Streamlit UI — 4 tabs including AI assistant
-pawpal_system.py        # Backend logic: Owner, Pet, Task, Scheduler
-rag.py                  # RAG pipeline: retrieval + Gemini API call
-main.py                 # CLI demo script
-generate_diagram.py     # Generates assets/architecture.png
-requirements.txt        # Python dependencies
-.env                    # API key — not committed (see .env.example)
-.env.example            # Template for .env
+app.py                      # Streamlit entry point — 4 tabs
+main.py                     # CLI demo script
+requirements.txt            # Python dependencies
+.env                        # API key — not committed (see .env.example)
+.env.example                # Template for .env
+src/
+  pawpal_system.py          # Backend: Owner, Pet, Task, Scheduler
+  rag.py                    # RAG pipeline: retrieval + Gemini API
 knowledge_base/
-  dogs.md               # Dog care: feeding, exercise, medications, vet visits
-  cats.md               # Cat care
-  rabbits.md            # Rabbit care
-  birds.md              # Bird care
-  general.md            # Cross-species tips, emergency signs, medication types
+  dogs.md                   # Dog care: feeding, exercise, medications, vet
+  cats.md                   # Cat care
+  rabbits.md                # Rabbit care
+  birds.md                  # Bird care
+  general.md                # Cross-species tips, emergency signs
 assets/
-  PawPal.png            # App screenshot
-  architecture.png      # System architecture diagram
+  PawPal.png                # App screenshot
+  architecture.png          # System architecture diagram
+docs/
+  reflection.md             # Design decisions and AI collaboration notes
+scripts/
+  generate_diagram.py       # Regenerates assets/architecture.png
 tests/
-  test_pawpal.py        # 19 automated pytest tests
+  test_pawpal.py            # 19 automated pytest tests
 ```
 
 ---

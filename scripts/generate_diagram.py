@@ -1,10 +1,12 @@
 """Generates architecture.png — a system diagram for PawPal+."""
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch
 
-OUT_FILE = "assets/architecture.png"
+OUT_FILE = str(Path(__file__).parent.parent / "assets" / "architecture.png")
 
 
 def add_box(ax, cx, cy, w, h, text, facecolor, edgecolor="#2c2c2c",
