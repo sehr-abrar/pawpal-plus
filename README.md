@@ -1,6 +1,110 @@
 # PawPal+ — Smart Pet Care Management
 
-PawPal+ is a Streamlit app that helps busy pet owners stay on top of daily care routines. It tracks feedings, walks, medications, and appointments for multiple pets — using algorithmic scheduling logic to sort, filter, detect conflicts, and handle recurring tasks automatically.
+PawPal+ is a Streamlit app that helps busy pet owners stay on top of daily care routines. It tracks feedings, walks, medications, and appointments for multiple pets — with algorithmic scheduling and an AI-powered Pet Care Assistant backed by a RAG pipeline.
+
+![PawPal](assets/PawPal.png)
+
+---
+
+## Features
+
+| Feature | Description |
+|---|---|
+| **Multi-pet support** | Track any number of pets per owner |
+| **Task scheduling** | Add, complete, and delete care tasks with priority and duration |
+| **Sorting by time** | Schedule always displayed in chronological HH:MM order |
+| **Filtering** | Filter tasks by pet, completion status, or priority |
+| **Conflict warnings** | Flags tasks scheduled at the exact same time |
+| **Recurring tasks** | Completing a daily/weekly task auto-creates the next occurrence |
+| **AI Pet Care Assistant** | RAG-powered chatbot answers care questions using a built-in knowledge base |
+
+---
+
+## AI Feature: Retrieval-Augmented Generation (RAG)
+
+The **Pet Care Assistant** tab lets you ask questions like *"how often should I walk my dog?"* or *"what vaccines does my cat need?"*. It works as follows:
+
+1. Your question is scored against 5 pet care knowledge-base files using keyword overlap
+2. The top 2 most relevant sections are retrieved
+3. Those sections + your pet list are passed to **Gemini 2.0 Flash Lite** as grounded context
+4. The answer is displayed alongside the sources that were retrieved
+
+All activity (retrieved chunks, token counts, retries, errors) is logged to `pawpal.log`.
+
+![Architecture](assets/architecture.png)
+
+---
+
+## Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Copy `.env.example` to `.env` and add your Google AI Studio API key:
+
+```bash
+cp .env.example .env
+# then edit .env and set GOOGLE_API_KEY=your_key_here
+```
+
+Get a free key (no credit card) at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+
+---
+
+## Running the App
+
+```bash
+streamlit run app.py
+```
+
+---
+
+## CLI Demo
+
+Verify backend logic without the UI:
+
+```bash
+python3 main.py
+```
+
+---
+
+## Tests
+
+```bash
+python -m pytest tests/ -v
+```
+
+19 tests covering task completion, pet management, sorting, filtering, recurrence, conflict detection, and today's schedule logic.
+
+---
+
+## Project Structure
+
+```
+app.py                  # Streamlit UI — 4 tabs including AI assistant
+pawpal_system.py        # Backend logic: Owner, Pet, Task, Scheduler
+rag.py                  # RAG pipeline: retrieval + Gemini API call
+main.py                 # CLI demo script
+generate_diagram.py     # Generates assets/architecture.png
+requirements.txt        # Python dependencies
+.env                    # API key — not committed (see .env.example)
+.env.example            # Template for .env
+knowledge_base/
+  dogs.md               # Dog care: feeding, exercise, medications, vet visits
+  cats.md               # Cat care
+  rabbits.md            # Rabbit care
+  birds.md              # Bird care
+  general.md            # Cross-species tips, emergency signs, medication types
+assets/
+  PawPal.png            # App screenshot
+  architecture.png      # System architecture diagram
+tests/
+  test_pawpal.py        # 19 automated pytest tests
+```
 
 ---
 
@@ -52,117 +156,4 @@ classDiagram
     Owner "1" --> "0..*" Pet : owns
     Pet "1" --> "0..*" Task : has
     Scheduler "1" --> "1" Owner : manages
-```
-
----
-
-## Features
-
-| Feature | Description |
-|---|---|
-| **Multi-pet support** | Track any number of pets per owner |
-| **Task management** | Add, complete, and delete care tasks with priority and duration |
-| **Sorting by time** | Schedule is always displayed in chronological HH:MM order |
-| **Filtering** | Filter tasks by pet, completion status, or priority |
-| **Conflict warnings** | Flags tasks scheduled at the exact same time across pets |
-| **Daily & weekly recurrence** | Completing a recurring task auto-creates the next occurrence |
-| **Persistent session** | All data lives in `st.session_state` — no page-refresh data loss |
-
----
-
-## Smarter Scheduling
-
-- **Sorting:** Tasks are sorted using Python's `sorted()` with a `lambda` key on the `HH:MM` time string, which sorts correctly lexicographically for zero-padded 24-hour times.
-- **Conflict detection:** The Scheduler compares every pair of tasks in today's schedule; any pair sharing an exact time string is flagged with a human-readable warning.
-- **Recurring tasks:** When `mark_task_complete()` is called on a `daily` or `weekly` task, a new `Task` instance is created using Python's `timedelta` and added to the same pet's task list.
-
----
-
-## Setup
-
-```bash
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
----
-
-## Running the App
-
-```bash
-streamlit run app.py
-```
-
----
-
-## CLI Demo
-
-To verify backend logic without the UI:
-
-```bash
-python main.py
-```
-
-Sample output:
-```
-==================================================
-  TODAY'S SCHEDULE
-==================================================
-  [○] 07:00 — Morning walk (Mochi, 30min, high)
-  [○] 08:00 — Heartworm pill (Mochi, 5min, high)
-  [○] 08:00 — Wet food (Luna, 10min, high)
-  ...
-
-==================================================
-  CONFLICT WARNINGS
-==================================================
-  ⚠  Conflict at 08:00: 'Heartworm pill' (Mochi) clashes with 'Wet food' (Luna)
-```
-
----
-
-## Testing PawPal+
-
-Run the full automated test suite:
-
-```bash
-python -m pytest tests/ -v
-```
-
-The suite covers 19 tests across these behaviours:
-
-| Category | Tests |
-|---|---|
-| Task completion | `mark_complete()` changes status; idempotent |
-| Pet task management | Add/remove tasks; count changes correctly |
-| Owner aggregation | `get_all_tasks()` spans all pets |
-| Sorting | Chronological order; stable with one task |
-| Filtering | By pet, by status |
-| Daily recurrence | Next task created for tomorrow; not yet complete |
-| Weekly recurrence | Next task created seven days later |
-| One-time tasks | No follow-up task created |
-| Conflict detection | Same-time clash detected; different times pass |
-| Today's schedule | Excludes future and completed tasks |
-
-**Confidence: ★★★★☆** — core scheduling behaviors are thoroughly covered. Edge cases around overlapping durations (rather than exact time matches) and multi-timezone support would be next steps.
-
----
-
-## 📸 Demo
-
-![PawPal](PawPal.png)
-
----
-
-## Project Structure
-
-```
-pawpal_system.py   # All backend logic (Owner, Pet, Task, Scheduler)
-main.py            # CLI demo script
-app.py             # Streamlit UI
-tests/
-  test_pawpal.py   # 19 automated pytest tests
-reflection.md      # Design decisions and AI collaboration notes
-requirements.txt   # streamlit, pytest
 ```
