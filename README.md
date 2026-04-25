@@ -160,13 +160,7 @@ python3 scripts/test_harness.py
 
 ## Demo Walkthrough
 
-> 🎥 **Loom video:** _Add your Loom link here before submission_
-
-The walkthrough demonstrates:
-1. Adding a dog and a cat with conflicting task times
-2. Viewing the conflict warning on Today's Schedule
-3. Asking the Pet Care Assistant "how often should I feed my dog?" — shows retrieval sources and AI answer
-4. Asking "what vaccines does my cat need?" — shows a different source being retrieved
+> 🎥 **Video Placeholder:**
 
 ---
 
