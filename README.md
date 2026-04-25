@@ -6,6 +6,23 @@ PawPal+ is a Streamlit application that helps busy pet owners manage daily care 
 
 ---
 
+## Table of Contents
+
+- [Original Project](#original-project)
+- [What It Does](#what-it-does)
+- [AI Feature: Retrieval-Augmented Generation (RAG)](#ai-feature-retrieval-augmented-generation-rag)
+- [Architecture Overview](#architecture-overview)
+- [Setup](#setup)
+- [Sample Interactions](#sample-interactions)
+- [Design Decisions](#design-decisions)
+- [Testing Summary](#testing-summary)
+- [Demo Walkthrough](#demo-walkthrough)
+- [Reflection](#reflection)
+- [Project Structure](#project-structure)
+- [System Architecture (UML)](#system-architecture-uml)
+
+---
+
 ## Original Project
 
 This project extends **PawPal+**, originally built in Module 3 of AI110. The original system was a pure-algorithmic pet care scheduler: it tracked tasks (feedings, walks, medications, vet appointments) across multiple pets, sorted them chronologically, detected scheduling conflicts, and auto-generated recurring task occurrences. It had no AI integration — all logic was rule-based Python. This extension adds a fully integrated RAG pipeline and conversational AI assistant as a fourth tab in the existing Streamlit UI.
@@ -160,7 +177,7 @@ python3 scripts/test_harness.py
 
 ## Demo Walkthrough
 
-> 🎥 **Video Placeholder:**
+> 🎥 [![**PawPal+ Demo**](https://img.youtube.com/vi/HozJsEOx4EQ/0.jpg)](https://youtu.be/HozJsEOx4EQ)
 
 ---
 
